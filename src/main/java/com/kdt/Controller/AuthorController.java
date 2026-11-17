@@ -81,4 +81,35 @@ public class AuthorController {
 
     @GetMapping("/library/authors/ghost/books")
     public String ghostBooks() {return authorBooks("없는 작가");}
+
+    @GetMapping("/library/authors/summary")
+    public String summary(){
+        List<Author> authors = this.authorService.findAll();
+        if(authors.isEmpty()){
+            return "none";
+        }
+
+        StringBuilder lines = new StringBuilder();
+        int allBooks = 0;
+        for(Author author : authors){
+            int sum = 0;
+            int undated = 0;
+            List<Book> books = author.getBooks();
+
+            for(Book book : books){
+                sum += book.getPrice();
+                if(book.getCreatedAt() == null){
+                    undated++;
+                }
+            }
+
+            int total = books.size();
+            allBooks += total;
+
+            lines.append(author.getName()).append(" total = ").append(total).append(" sum = ").append(sum).append(" undated = ").append(undated).append("\n");
+        }
+
+        lines.append("allBooks = ").append(allBooks);
+        return lines.toString();
+    }
 }

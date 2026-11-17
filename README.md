@@ -96,11 +96,13 @@ HTTP 요청
 |---|---|---|
 | `LibraryInfoController` | `/library/hello` | 도서관 이름과 max-title 출력 |
 | | `/library/policy/same` | 주입된 두 `LibraryPolicy` 가 같은 인스턴스(싱글톤)인지 확인 |
+| | `/library/report` | 도서관 이름 + 저자/책 개수 + 최고가 책 요약 (⚠ 아래 이슈 참고) |
 | `AuthorController` | `/library/author` | 전체 저자 목록(id, 이름, 국가, 책 수) |
 | | `/library/authors/sample` | id=1 저자 조회 |
 | | `/library/authors/hangang/books` | 한강의 책 목록 + 개수 |
 | | `/library/authors/newbie/books` | 박신인(책 없음) 케이스 |
 | | `/library/authors/ghost/books` | 존재하지 않는 저자 케이스(`missing`) |
+| | `/library/authors/summary` | 저자별 책 수·가격 합계·`createdAt` 미기록 수 + 전체 책 수 |
 | `BookController` | `/library/books` | 전체 책 목록 |
 | | `/library/books/sample` | id=1 책 조회 |
 | | `/library/books/by-hangang` | 한강의 책 (`findByAuthorId`) |
@@ -135,3 +137,5 @@ HTTP 요청
 - `LibraryInfoController` 는 `LibraryPolicy` 를 두 번 주입받으며 둘 다 같은 싱글톤 빈입니다.
 - 컨트롤러 일부는 `open-in-view` 기본값(true) 덕분에 LAZY 로딩이 동작합니다.
 - 시드 데이터의 "소년이 온다" 가격이 150000 으로 입력되어 있습니다 (오타 가능성).
+- `LibraryInfoController` 의 `authorService` / `bookService` 필드는 생성자가 `LibraryPolicy` 두 개만 받기 때문에 주입되지 않습니다. 따라서 `/library/report` 호출 시 `NullPointerException` 이 발생합니다. (생성자 파라미터에 두 서비스를 추가해야 함)
+- `/library/authors/summary` 의 `undated` 집계는 위의 `@EnableJpaAuditing` 미설정 이슈 때문에 현재 전부 책 개수와 같게 나옵니다.
